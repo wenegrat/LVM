@@ -14,41 +14,62 @@ for m=0:p.maxMermodes;
 
    
 end
-     %Make Damping
-    dampn = p.damp*(2.5/c).^2; % XXX --- Need to come back to this.
+
+%Make Damping
+dampn = p.damp*(2.6/c).^2; % XXX --- Need to come back to this.
 
 n = length(p.lons);                            % number of space gridpoints
 dt = (p.time(2)-p.time(1)).*p.timetosec;       % time step
-tf = p.time(end).*p.timetosec;                 % final time
+% tf = p.time(end).*p.timetosec;                 % final time
 
 x = p.lons.*p.deg;                             % space in meters
 h = x(2)-x(1);                                 %dx
 r = cn(1).*dt/h; disp(sprintf('Courant number: %0.2f',r)) %Must be < 1 for stability
 u = zeros(size(x));                            % IC
-u0 = u;
+% u0 = u;
 
 %Matrix
 I = eye(n);
 R = diag(ones(1,n-1),1);
-Dxc = (R+diag([-1 zeros(1,n-2) 1])-R')/(2*h); % c*centered diff in x
+Dxc = (R+diag([-1 zeros(1,n-2) 1])-R')/(2*h); % centered diff in x
 Dxx = (R-diag([1 2*ones(1,n-2) 1])+R')/h^2;
 
-ur = zeros([p.maxMermodes+1 length(u)]);       %Assign IC
-q = NaN * zeros([size(ur) length(p.time)]);    %Preallocate
+uall = zeros([p.maxMermodes+1 length(u)]);          % All waves
+uforc  = uall;                                      % Only Forced waves
+urefl = uforc;                                      % Only reflected waves
+urere = uforc;                                      % Only 2x relfected waves
 
-for tn = 1:length(p.time)                   % TIME LOOOP
+%Preallocate
+q = NaN * zeros([4 size(uall) length(p.time)]);      % Total Wave Field
+
+
+
+for tn = 1:length(p.time)                   % TIME LOOP
+    if (mod(tn, p.tdisps) == 0)
+        display(['Integrating Timestep: ', num2str(tn), '/', num2str(length(p.time))]);
+    end
+    
     for m = 0:p.maxMermodes;                % MERIDIONAL MODE LOOP
         
         % Enforce BC
         if (m==0)
             % West BC
-            wbc = 0;
+            wbcforced = 0;
+            wbcall = 0;
             for mm = 0:p.maxMermodes
-                wbc = wbc + wref(mm+1)*ur(mm+1,1);
+                wbcforced = wbcforced + wref(mm+1)*uall(mm+1,1);
+                wbcall = wbcall + wref(mm+1)*uforc(mm+1, 1);
             end
-            ur(m+1,1) = p.wref.*wbc; % Assign BC to Kelvin Mode
+            uall(m+1,1) = wbcall;   % Assign BC to Kelvin Mode
+            uforc(m+1, 1) = 0;      % No reflection if forced only, note this is at the upwind boundary
+            urefl(m+1, 1) = wbcforced; % Reflection only of directly forced
+            urere(m+1, 1) = wbcall; % Reflected plus reflected
         else
-            ur(m+1,end) = p.eref.*eref(m+1).*ur(1,end); % East BC, assigned to Rossby Mode
+            % East BC
+            uall(m+1,end) = eref(m+1).*uall(1,end); % East BC, assigned to Rossby Mode
+            uforc(m+1, end) = 0;
+            urefl(m+1, end) = eref(m+1).*uforc(1, end);
+            urere(m+1, end) = eref(m+1).*uall(1,end);
         end
 
        % Lax Wendroff
@@ -72,29 +93,18 @@ for tn = 1:length(p.time)                   % TIME LOOOP
        
        Fn = Fm.*psi0./(p.rho.*p.H); % Forcing, dimensionalized
        
-       ur(m+1,:) = M*squeeze(ur(m+1,:))'+dt.*Fn; % Time step forward.
+       uall(m+1,:) = M*squeeze(uall(m+1,:))'+dt.*Fn; % Time step forward.
+       uforc(m+1,:) = M*squeeze(uforc(m+1,:))'+dt.*Fn; 
+       urefl(m+1,:) = M*squeeze(urefl(m+1,:))'; % No forcing for reflected waves
+       urere(m+1,:) = M*squeeze(urere(m+1,:))';
        
     end
-       %Plotting (temporary)
-%        clf
-%        subplot(3,1,1)
-%        plot(x./p.deg, Fn, 'k');
-%        ylim([-300 300])
-%        xlim([x(1)./p.deg x(end)./p.deg]);
-%        subplot(3,1,2:3)
-%        plot(x./p.deg,u0,'b:',x./p.deg,ur(1,:),'r.-')
-%        hold on
-%               plot(x./p.deg,ur(2,:),'b.-')
-%               plot(x./p.deg, ur(4,:), 'g');
-%         hold off
-%     %    axis([-1 1 -.1 1.1])
-%        xlim([x(1)./p.deg x(end)./p.deg]);
-%        ylim([-.5*1e8 .5*1e8]);
-%        title(sprintf('%s , t=%0.2f','Lax-Wendroff', tn))
-%        drawnow
-%        
+
        %Assign output
-       q(:,:,tn) = ur;
+       q(1,:,:,tn) = uall;
+       q(2,:,:,tn) = uforc;
+       q(3,:,:,tn) = urefl;
+       q(4,:,:,tn) = urere;
 end
 
 

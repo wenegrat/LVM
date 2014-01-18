@@ -42,25 +42,25 @@ bm = reshape(b(:,1), nlon, nlat);
 yl = [-15 15];
 
 subplot(2,2,1)
-pcolor(p.lons, p.lats, sigmaobsm'); shading interp
+contourf(p.lons, p.lats, sigmaobsm'); 
 colorbar
 caxis([0 15]);
 ylim(yl);
 
 subplot(2,2,2)
-pcolor(p.lons, p.lats, sigmamodm'); shading interp
+contourf(p.lons, p.lats, sigmamodm'); 
 colorbar
 caxis([0 15]);
 ylim(yl);
 
 subplot(2,2,3)
-pcolor(p.lons, p.lats, crm'); shading interp
+contourf(p.lons, p.lats, crm'); 
 caxis([-1 1]);
 colorbar
 ylim(yl);
 
 subplot(2,2,4)
-pcolor(p.lons, p.lats, bm'); shading interp
+contourf(p.lons, p.lats, bm'); 
 caxis([-2 2]);
 ylim(yl);
 

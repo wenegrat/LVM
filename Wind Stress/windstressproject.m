@@ -1,4 +1,4 @@
-function F = windstressproject(taux, p, lambda, psi0)
+function F = windstressproject(taux, p, lambda)
 [nlons nlats ntimes] = size(taux);
 
 % %Preallocate output
@@ -24,21 +24,38 @@ function F = windstressproject(taux, p, lambda, psi0)
 %         end
 %     end
 % end
+yn = p.lats.*p.deg./lambda; % Normalized Meridional Dimension
 
-
-tvec = reshape(permute(taux, [1 3 2]), nlons*ntimes, nlats);
+tvec = double(reshape(permute(taux, [1 3 2]), nlons*ntimes, nlats));
 fvec = NaN * zeros([p.maxMermodes+1 nlons*ntimes]);
+
+psivec = NaN * zeros([p.maxMermodes+1 length(yn)]);
+for m=0:p.maxMermodes+1
+    psivec(m+1,:) = hermFuncAve(m, yn);
+end
+display('Hermite Polynomials Constructed');
+
 for j=1:(nlons*ntimes)
+    
+    if (mod(j, p.wdisps) == 0)
+        display(['Stress Step: ', num2str(j), '/', num2str(nlons*ntimes)]);
+    end
+    
     for m=0:p.maxMermodes
        if m==0 %Kelvin wave
-           psi = hermiteeq(m, p.lats.*p.deg./lambda);
-           fvec(m+1,j) = 1./sqrt(2) * trapz(p.lats.*p.deg./lambda, psi.*squeeze(tvec(j,:))');
+%            psi = 1./sqrt(2).*hermiteeq(m, yn);
+%                        psi = 1./sqrt(2).*hermFuncAve(m, yn);
+                                   psi = 1./sqrt(2).*psivec(m+1,:)';
+
+           fvec(m+1,j) =  trapz(yn, psi.*squeeze(tvec(j,:))');
        else    %Rossby Wave
-           psin1 = hermiteeq(m-1, p.lats.*p.deg./lambda);
-           psip1 = hermiteeq(m+1, p.lats.*p.deg./lambda);
-           tint = sqrt( (m*(m+1))/(2*2*m+1)).*...
+%            psin1 = hermiteeq(m-1, yn);
+%            psip1 = hermiteeq(m+1, yn);
+           psin1 = psivec(m,:)';
+           psip1 = psivec(m+2,:)';
+           tint = sqrt( (m*(m+1))/(2*(2*m+1))).*...
                (psip1./(sqrt(m+1)) - psin1./sqrt(m)).*squeeze(tvec(j,:))';
-           fvec(m+1,j) = trapz(p.lats.*p.deg./lambda, tint);
+           fvec(m+1,j) = trapz(yn, tint);
        end
     end
 end

@@ -7,7 +7,9 @@ svec = reshape(ssh, nlons.*nlats, nts);
 sveco = NaN * zeros([nlons*nlats length(resampleTime)]);
 for i=1:(nlons*nlats)
 %     sveco(i,:) = interp1(p.time, svec(i,:), resampleTime);
-      sveco(i,:) = BlockMean(svec(i,:),1,7*2);
+      sveco(i,:) = BlockMean(svec(i,:),1,7*2); % For Model Comp
+%       sveco(i,:) = BlockMean(svec(i,1:513*4),1,4);
+
       sveco(i,:) = sveco(i,:) - nanmean(sveco(i,:));
 end
 sshs = reshape(sveco, nlons, nlats, length(resampleTime));
