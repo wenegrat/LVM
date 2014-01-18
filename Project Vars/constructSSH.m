@@ -58,15 +58,15 @@ for n=1:p.maxVermodes
              phip1 = hermiteeq(m+1, eta);
              phin1 = hermiteeq(m-1, eta);
          end
-        
+         qt = squeeze(qvec(n,mm,:))';
         for y = 1:length(eta)         
             if (m==0)
                 if (kelv)   %Check to see if the Kelvin wave should be added
-                sshvec(y,:) = sshvec(y,:) + (c(n)./p.grav)*phik(y)./sqrt(2).*squeeze(qvec(n,mm,:))'.*pmodes(1,n); 
+                sshvec(y,:) = sshvec(y,:) + (c(n)./p.grav)*phik(y)./sqrt(2).*qt.*pmodes(1,n); 
                 end
             elseif ross     %Check to see if the Rossby wave should be added
                 h = sqrt( m*(m+1)/(2*(2*m + 1))).*(phip1(y)./sqrt(m+1) + phin1(y)./sqrt(m));
-                sshvec(y,:) = sshvec(y,:) + squeeze(qvec(n,mm,:))'.*(c(n)./p.grav).*h.*pmodes(1,n);
+                sshvec(y,:) = sshvec(y,:) + qt.*(c(n)./p.grav).*h.*pmodes(1,n);
             end
         end
      end
