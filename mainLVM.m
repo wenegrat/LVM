@@ -8,7 +8,7 @@ close all
 clear q
 
 % Create Wind Stress Projection?
-wp = false;
+wp = true;
 disp(['Generate forcing field, set to: ', num2str(wp)])
 
 if (~exist('ds', 'var'))
