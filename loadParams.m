@@ -26,6 +26,12 @@ p.maxMermodes = 6;
 
 p.damp = 1./(12*(30*24*60*60)); %12 month damping timescale for first mode
 
+
+% Apply Reflectivity
+% Note that applying a reflectivity directly during the integration is not
+% quite equivalent to applying during the construction of SSH or U fields
+% due to the finite differencing. This approach ensures
+% that the reflected waves are truly damped by the proper percentage.
 p.eref= .85;
 p.wref = .85;
 

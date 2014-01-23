@@ -25,6 +25,7 @@ function F = windstressproject(taux, p, lambda)
 %     end
 % end
 yn = p.lats.*p.deg./lambda; % Normalized Meridional Dimension
+dyn = yn(2) - yn(1);
 
 tvec = double(reshape(permute(taux, [1 3 2]), nlons*ntimes, nlats));
 fvec = NaN * zeros([p.maxMermodes+1 nlons*ntimes]);
@@ -47,7 +48,8 @@ for j=1:(nlons*ntimes)
 %                        psi = 1./sqrt(2).*hermFuncAve(m, yn);
                                    psi = 1./sqrt(2).*psivec(m+1,:)';
 
-           fvec(m+1,j) =  trapz(yn, psi.*squeeze(tvec(j,:))');
+%            fvec(m+1,j) =  trapz(yn, psi.*squeeze(tvec(j,:))'); % Trapz is accurate but slow
+             fvec(m+1, j) = sum(psi.*squeeze(tvec(j,:))'.*dyn);
        else    %Rossby Wave
 %            psin1 = hermiteeq(m-1, yn);
 %            psip1 = hermiteeq(m+1, yn);
@@ -55,7 +57,8 @@ for j=1:(nlons*ntimes)
            psip1 = psivec(m+2,:)';
            tint = sqrt( (m*(m+1))/(2*(2*m+1))).*...
                (psip1./(sqrt(m+1)) - psin1./sqrt(m)).*squeeze(tvec(j,:))';
-           fvec(m+1,j) = trapz(yn, tint);
+%            fvec(m+1,j) = trapz(yn, tint);
+            fvec(m+1, j) = sum(tint.*dyn);
        end
     end
 end

@@ -1,6 +1,8 @@
-motmodel = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/SSH_R_F.nc');
-motq = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/O_n1_f.nc');
-motwp = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/I_n1.nc');
+motmodel = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/SSH_out.nc');
+%%
+motq = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/O_n1_fr.nc');
+%%
+motwp = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/I_n2.nc');
 motin = ncdfread('/Users/JacobWenegrat/Documents/LWM/Wforc/ECMWF_TAUX_IO.nc');
 %%
 
@@ -15,8 +17,8 @@ end
 % % mode = 1;
 % qk  = squeeze(q(2,1,:,:,:));
 % qk = permute(qk, [2 3 1]);
-
-xloc = 15;
+figure
+xloc = 24;
 subplot(1,3,1)
 pcolor(squeeze(double(motmodel.SSH(xloc,:,:))));
 shading interp
@@ -29,15 +31,15 @@ shading interp;
 colorbar
 caxis([-.15 .15]);
 
-yloc = 40;
+yloc = 49;
 subplot(1,3,3)
 scatter(double(squeeze(motmodel.SSH(xloc,yloc,:))), squeeze(sshs(xloc,yloc,:)));
 onetoone
-% title(num2str(regress(double(squeeze(motq.coef(xloc,1000:2000,mode)))', squeeze(qk(xloc, 1000:2000,mode))')))
+title(num2str(regress(double(squeeze(motmodel.SSH(xloc,yloc,:))), squeeze(sshs(xloc, yloc,:)))))
 
 %%
-mode = 4;
-qk  = squeeze(q(2,1,:,:,:));
+mode = 1;
+qk  = squeeze(q(3,1,:,:,:));
 qk = permute(qk, [2 3 1]);
 
 subplot(1,3,1)
@@ -52,7 +54,7 @@ shading interp;
 colorbar
 caxis([-.15 .15]);
 
-xloc = 15;
+xloc = 25;
 subplot(1,3,3)
 scatter(double(squeeze(motq.coef(xloc,1000:2000,mode))), squeeze(qk(xloc, 1000:2000,mode)));
 onetoone
@@ -61,8 +63,8 @@ title(num2str(regress(double(squeeze(motq.coef(xloc,1000:2000,mode)))', squeeze(
 
 %%
 
-mode = 3;
-Ik  = squeeze(F(1,:,:,:));
+mode = 1;
+Ik  = squeeze(F(2,:,:,:));
 Ik = permute(Ik, [2 3 1]);
 
 subplot(1,3,1)

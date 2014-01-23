@@ -50,16 +50,16 @@ for n=1:p.maxVermodes
 
     disp('============= Integrate q function =====================');
     q(:,n,:,:,:) = integrateLVM_LW(squeeze(F(n,:,:,:)), p, c(n), pmd(1,n)); % 4 x N x M x Lon x Time
-    % q(1... is forced + reflected
+    % q(1... is all (forced and reflection)
     % q(2... is forced only
     % q(3... is single reflection
-    % q(4... includes refl+refl
+    % q(4...  refl+refl
 
     disp(['Time to calculate mode ', num2str(n),': ', num2str(toc./60), ' min']);
 end
 
 disp('============= Construct SSH Field  =====================');
-ssh = constructSSH(q, p, c, pmd);
+ssh = constructSSH(q, p, c, pmd, 1); % Default is to construct full ssh field
 % sshs = resampleSSH(ssh,p, ds.aviso.time);
 sshs = resampleSSH(ssh, p, motmodel.day*24);
 
@@ -69,33 +69,33 @@ disp(['Total Elapsed Time: ', num2str(toc./60), ' min']);
 
 
 %% Plots
- cl = [-.2 .2];
-%  
-% pause
-figure
-       
-       for i=1:length(motmodel.day)
-       clf
-       subplot(1,2,1)
-       pcolor(p.lons, p.lats, squeeze(sshs(:,:,i))');
-       shading interp;
-       caxis(cl);
-       ylim([-10 10]);
-       colorbar
-       title(['t = ', num2str(i), '/', num2str(length(p.time))]);
-       
-       subplot(1,2,2)
-%        pcolor(p.lons, p.lats, squeeze(ssh(:,:,i))');
-%         pcolor(ds.aviso.longs(22:82), ds.aviso.lats, double(squeeze(ds.aviso.ssh(22:82,:,i)/100))'); 
-        pcolor(motmodel.lon, motmodel.lat, double(squeeze(motmodel.SSH(:,:,i))'));
-       shading interp;
-       caxis(cl);
-       ylim([-10 10]);
-       colorbar
-       title(['t = ', num2str(i), '/', num2str(length(p.time))]);
-       drawnow 
-       
-       end
+%  cl = [-.2 .2];
+% %  
+% % pause
+% figure
+%        
+%        for i=1:length(motmodel.day)
+%        clf
+%        subplot(1,2,1)
+%        pcolor(p.lons, p.lats, squeeze(sshs(:,:,i))');
+%        shading interp;
+%        caxis(cl);
+%        ylim([-10 10]);
+%        colorbar
+%        title(['t = ', num2str(i), '/', num2str(length(p.time))]);
+%        
+%        subplot(1,2,2)
+% %        pcolor(p.lons, p.lats, squeeze(ssh(:,:,i))');
+% %         pcolor(ds.aviso.longs(22:82), ds.aviso.lats, double(squeeze(ds.aviso.ssh(22:82,:,i)/100))'); 
+%         pcolor(motmodel.lon, motmodel.lat, double(squeeze(motmodel.SSH(:,:,i))'));
+%        shading interp;
+%        caxis(cl);
+%        ylim([-10 10]);
+%        colorbar
+%        title(['t = ', num2str(i), '/', num2str(length(p.time))]);
+%        drawnow 
+%        
+%        end
   
        %%
 %  cl = [-.2 .2];

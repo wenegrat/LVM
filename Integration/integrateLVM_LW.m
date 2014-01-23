@@ -57,8 +57,8 @@ for tn = 1:length(p.time)                   % TIME LOOP
             wbcforced = 0;
             wbcall = 0;
             for mm = 0:p.maxMermodes
-                wbcforced = wbcforced + wref(mm+1)*uall(mm+1,1);
-                wbcall = wbcall + wref(mm+1)*uforc(mm+1, 1);
+                wbcforced = wbcforced + wref(mm+1)*uforc(mm+1,1);
+                wbcall = wbcall + wref(mm+1)*uall(mm+1, 1);
             end
             uall(m+1,1) = wbcall;   % Assign BC to Kelvin Mode
             uforc(m+1, 1) = 0;      % No reflection if forced only, note this is at the upwind boundary
@@ -66,10 +66,11 @@ for tn = 1:length(p.time)                   % TIME LOOP
             urere(m+1, 1) = wbcall; % Reflected plus reflected
         else
             % East BC
-            uall(m+1,end) = eref(m+1).*uall(1,end); % East BC, assigned to Rossby Mode
-            uforc(m+1, end) = 0;
             urefl(m+1, end) = eref(m+1).*uforc(1, end);
-            urere(m+1, end) = eref(m+1).*uall(1,end);
+            urere(m+1, end) = eref(m+1).*uall(1,end); %XXX Look at this, maybe should come from urefl
+            uforc(m+1, end) = 0;
+            uall(m+1,end) = eref(m+1).*uall(1,end); % East BC, assigned to Rossby Mode
+
         end
 
        % Lax Wendroff
@@ -104,7 +105,7 @@ for tn = 1:length(p.time)                   % TIME LOOP
        q(1,:,:,tn) = uall;
        q(2,:,:,tn) = uforc;
        q(3,:,:,tn) = urefl;
-       q(4,:,:,tn) = urere;
+       q(4,:,:,tn) = urere - urefl; %Twice reflected is Reflected - (Reflected once)
 end
 
 

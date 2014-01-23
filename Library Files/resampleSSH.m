@@ -10,7 +10,7 @@ for i=1:(nlons*nlats)
       sveco(i,:) = BlockMean(svec(i,:),1,7*2); % For Model Comp
 %       sveco(i,:) = BlockMean(svec(i,1:513*4),1,4);
 
-      sveco(i,:) = sveco(i,:) - nanmean(sveco(i,:));
+%       sveco(i,:) = sveco(i,:) - nanmean(sveco(i,:));
 end
 sshs = reshape(sveco, nlons, nlats, length(resampleTime));
 end
