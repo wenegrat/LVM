@@ -1,6 +1,6 @@
-motmodel = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/SSH_out.nc');
+motmodel = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/SSH_R_f.nc');
 %%
-motq = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/O_n1_fr.nc');
+motq = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/O_n1_f.nc');
 %%
 motwp = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/I_n2.nc');
 motin = ncdfread('/Users/JacobWenegrat/Documents/LWM/Wforc/ECMWF_TAUX_IO.nc');
@@ -38,8 +38,8 @@ onetoone
 title(num2str(regress(double(squeeze(motmodel.SSH(xloc,yloc,:))), squeeze(sshs(xloc, yloc,:)))))
 
 %%
-mode = 1;
-qk  = squeeze(q(3,1,:,:,:));
+mode = 2;
+qk  = squeeze(q(2,1,:,:,:));
 qk = permute(qk, [2 3 1]);
 
 subplot(1,3,1)
@@ -55,10 +55,11 @@ colorbar
 caxis([-.15 .15]);
 
 xloc = 25;
+tr = 4000:5000;
 subplot(1,3,3)
-scatter(double(squeeze(motq.coef(xloc,1000:2000,mode))), squeeze(qk(xloc, 1000:2000,mode)));
+scatter(double(squeeze(motq.coef(xloc,tr,mode))), squeeze(qk(xloc, tr,mode)));
 onetoone
-title(num2str(regress(double(squeeze(motq.coef(xloc,1000:2000,mode)))', squeeze(qk(xloc, 1000:2000,mode))')))
+title(num2str(regress(double(squeeze(motq.coef(xloc,tr,mode)))', squeeze(qk(xloc, tr,mode))')))
 
 
 %%
@@ -84,3 +85,33 @@ subplot(1,3,3)
 scatter(double(squeeze(motwp.wind_coef(xloc,1000:2000,mode))).*1e-3, squeeze(Ik(xloc, 1000:2000,mode)));
 onetoone
 title(num2str(regress(double(squeeze(motwp.wind_coef(xloc,1000:2000,mode)))'.*1e-3, squeeze(Ik(xloc, 1000:2000,mode))')))
+
+
+%% Plots
+ cl = [-.2 .2];
+%  
+% pause
+figure
+       
+       for i=1:length(motmodel.day)
+       clf
+       subplot(1,2,1)
+       pcolor(p.lons, p.lats, squeeze(sshs(:,:,i))');
+       shading interp;
+       caxis(cl);
+       ylim([-10 10]);
+       colorbar
+       title(['t = ', num2str(i), '/', num2str(length(p.time))]);
+       
+       subplot(1,2,2)
+%        pcolor(p.lons, p.lats, squeeze(ssh(:,:,i))');
+%         pcolor(ds.aviso.longs(22:82), ds.aviso.lats, double(squeeze(ds.aviso.ssh(22:82,:,i)/100))'); 
+        pcolor(motmodel.lon, motmodel.lat, double(squeeze(motmodel.SSH(:,:,i))'));
+       shading interp;
+       caxis(cl);
+       ylim([-10 10]);
+       colorbar
+       title(['t = ', num2str(i), '/', num2str(length(p.time))]);
+       drawnow 
+       
+       end
