@@ -19,27 +19,9 @@ function ssh = constructSSH(q, p, c, pmodes, option )
 
 [kelv ross force refl rere] = switchTypes(option);
             
-qvecrere = reshape(squeeze(q(4,:,:,:,:)),  p.maxVermodes, p.maxMermodes + 1, length(p.lons).*length(p.time));
-
 
 %Make the q vector depending on options
-qvec = zeros([p.maxVermodes p.maxMermodes+1 length(p.lons).*length(p.time)]);
-
-if (force)
-    % Reshape the q vectors           
-    qvecforc = reshape(squeeze(q(2,:,:,:,:)),  p.maxVermodes, p.maxMermodes + 1, length(p.lons).*length(p.time));
-    qvec = qvec + qvecforc;
-end
-if (refl)
-    qvecrefl = reshape(squeeze(q(3,:,:,:,:)),  p.maxVermodes, p.maxMermodes + 1, length(p.lons).*length(p.time));
-    qvecrefl(:,1,:) = qvecrefl(:, 1,:).*p.wref; % Apply western BC reflectivity to Kelvin mode
-    qvecrefl(:,2:end,:) = qvecrefl(:,2:end,:).*p.eref; % Apply Eastern BC reflectivity to all Rossby modes;
-    qvec = qvec + qvecrefl;
-end
-if (rere)
-    qvecrere = qvecrere.*p.wref.*p.eref; % Apply both BCs to the reflect + reflect;
-    qvec = qvec + qvecrere;
-end
+qvec = makeqvec(q, p, force, refl, rere);
 
 %Preallocate for speed
 sshvec = zeros([length(p.lats) length(p.lons).*length(p.time)]);
@@ -76,72 +58,4 @@ end
  ssh = permute(ssh, [2 1 3]);
 end
 
-
-% Helper function to isolate the switch statement
-function [kelv ross force refl rere] = switchTypes(option)
-
-    switch option
-        case 1  %All forcing
-                kelv = true;
-                ross = true;
-
-                force = true;
-                refl = true;
-                rere = true;
-                display('All Forcing');
-        case 2  %Kelvin Forced
-                kelv = true;
-                ross = false;
-
-                force = true;
-                refl = false;
-                rere = false;
-                display('Kelvin - Forced');
-        case 3  %Kelvin Reflected
-                kelv = true;
-                ross = false;
-
-                force = false;
-                refl = true;
-                rere = false;
-                display('Kelvin - Reflected');
-
-        case 4  %Kelvin Reflected twice
-                kelv = true;
-                ross = false;
-
-                force = false;
-                refl = false;
-                rere = true;                
-                display('Kelvin - Reflected x 2');
-
-        case 5  %Rossby Forced
-                kelv = false;
-                ross = true;
-
-                force = true;
-                refl = false;
-                rere = false;                
-                display('Rossby - Forced');
-
-        case 6  %Rossby Reflected
-                kelv = false;
-                ross = true;
-
-                force = false;
-                refl = true;
-                rere = false;                
-                display('Rossby - Reflected');
-
-        case 7  %Rossby Reflected twice
-                kelv = false;
-                ross = true;
-
-                force = false;
-                refl = false;
-                rere = true;                
-                display('Rossby - Reflected x 2');
-
-    end
-end
 
