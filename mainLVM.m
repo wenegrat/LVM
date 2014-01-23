@@ -8,7 +8,7 @@ close all
 clear q
 
 % Create Wind Stress Projection?
-wp = true;
+wp = false;
 disp(['Generate forcing field, set to: ', num2str(wp)])
 
 if (~exist('ds', 'var'))
@@ -68,63 +68,3 @@ disp('============= Construct U Field    =====================');
 disp(['Total Elapsed Time: ', num2str(toc./60), ' min']);
 
 
-%% Plots
-%  cl = [-.2 .2];
-% %  
-% % pause
-% figure
-%        
-%        for i=1:length(motmodel.day)
-%        clf
-%        subplot(1,2,1)
-%        pcolor(p.lons, p.lats, squeeze(sshs(:,:,i))');
-%        shading interp;
-%        caxis(cl);
-%        ylim([-10 10]);
-%        colorbar
-%        title(['t = ', num2str(i), '/', num2str(length(p.time))]);
-%        
-%        subplot(1,2,2)
-% %        pcolor(p.lons, p.lats, squeeze(ssh(:,:,i))');
-% %         pcolor(ds.aviso.longs(22:82), ds.aviso.lats, double(squeeze(ds.aviso.ssh(22:82,:,i)/100))'); 
-%         pcolor(motmodel.lon, motmodel.lat, double(squeeze(motmodel.SSH(:,:,i))'));
-%        shading interp;
-%        caxis(cl);
-%        ylim([-10 10]);
-%        colorbar
-%        title(['t = ', num2str(i), '/', num2str(length(p.time))]);
-%        drawnow 
-%        
-%        end
-  
-       %%
-%  cl = [-.2 .2];
-%  subplot(1,2,1)
-%  pcolor(p.lons, p.ttime(1:513), squeeze(sshs(:,26,:))'); 
-%  shading interp
-%  datetick('y','mm-yy');
-%  ylim([p.time(1) p.time(end)]);
-%  colorbar;
-%  caxis(cl);
-%  grid on
-%   subplot(1,2,2)
-%  pcolor(ds.aviso.longs(22:82), ds.aviso.time, double(squeeze(ds.aviso.ssh(22:82,27,2:end)/100))'); 
-%  shading interp
-%  datetick('y', 'mm-yy');
-%   ylim([p.time(1) p.time(end)]);
-% colorbar;
-%  caxis(cl*1);
-% 
-% % %        ylim([-300 300])
-% %        xlim([x(1)./p.deg x(end)./p.deg]);
-%        subplot(3,1,2:3)
-%        plot(x./p.deg,u0,'b:',x./p.deg,ur(1,:),'r.-')
-%        hold on
-%               plot(x./p.deg,ur(2,:),'b.-')
-%               plot(x./p.deg, ur(4,:), 'g');
-%         hold off
-%     %    axis([-1 1 -.1 1.1])
-%        xlim([x(1)./p.deg x(end)./p.deg]);
-%        ylim([-.5*1e8 .5*1e8]);
-%        title(sprintf('%s , t=%0.2f','Lax-Wendroff', tn))
-%        drawnow
