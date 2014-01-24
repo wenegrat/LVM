@@ -22,7 +22,7 @@ p = loadParams(motin);
 % Calculate Vertical Modes
 
 % [wmd pmd c] = calcVertModes(ds, p);
-pmd = [4.93 0; 4.16 0]'; % in this form to match output of calcVertModes
+pmd = [4.93 4.926; 4.16 4.1592]'; % in this form to match output of calcVertModes
 c = [2.5335 1.6257];
 
 lambda = sqrt(c./(p.beta));
@@ -58,13 +58,28 @@ for n=1:p.maxVermodes
     disp(['Time to calculate mode ', num2str(n),': ', num2str(toc./60), ' min']);
 end
 
+% Construct Dynamic Variables from q field.
+%                       1 - All
+%                       2 - Kelvin Forced 
+%                       3 - Kelvin Reflected 
+%                       4 - Kelvin Reflected x 2
+%                       5 - Rossby Forced
+%                       6 - Rossby Reflected
+%                       7 - Rossby Reflected x 2
+% ===================================================
+coption = 1;
+
 disp('============= Construct SSH Field  =====================');
-ssh = constructSSH(q, p, c, pmd, 1); % Default is to construct full ssh field
+ssh = constructSSH(q, p, c, pmd, coption); 
 % sshs = resampleSSH(ssh,p, ds.aviso.time);
 sshs = resampleSSH(ssh, p, motmodel.day*24);
+    disp(['Time to construct SSH ', num2str(n),': ', num2str(toc./60), ' min']);
 
 disp('============= Construct U Field    =====================');
-    
+u = constructU(q, p, c, pmd, coption);
+us = resampleU(u, motmodel.day*24);
+
 disp(['Total Elapsed Time: ', num2str(toc./60), ' min']);
+
 
 

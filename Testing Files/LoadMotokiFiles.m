@@ -1,9 +1,11 @@
 motmodel = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/SSH_R_f.nc');
 %%
-motq = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/O_n1_f.nc');
+motq = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/O_n1_fr.nc');
 %%
 motwp = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/I_n2.nc');
 motin = ncdfread('/Users/JacobWenegrat/Documents/LWM/Wforc/ECMWF_TAUX_IO.nc');
+%%
+motu = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/u15m_R_fr.nc');
 %%
 
 for i=1:1682
@@ -38,8 +40,8 @@ onetoone
 title(num2str(regress(double(squeeze(motmodel.SSH(xloc,yloc,:))), squeeze(sshs(xloc, yloc,:)))))
 
 %%
-mode = 2;
-qk  = squeeze(q(2,1,:,:,:));
+mode = 4;
+qk  = squeeze(q(3,1,:,:,:));
 qk = permute(qk, [2 3 1]);
 
 subplot(1,3,1)
@@ -54,7 +56,7 @@ shading interp;
 colorbar
 caxis([-.15 .15]);
 
-xloc = 25;
+xloc = 5;
 tr = 4000:5000;
 subplot(1,3,3)
 scatter(double(squeeze(motq.coef(xloc,tr,mode))), squeeze(qk(xloc, tr,mode)));
