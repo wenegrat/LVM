@@ -1,64 +1,54 @@
 function F = windstressproject(taux, p, lambda)
+
 [nlons nlats ntimes] = size(taux);
 
-% %Preallocate output
-% F = NaN * zeros([p.maxMermodes+1 length(p.lons) length(p.time)]);
-% 
-% for t = 1:length(p.time)
-%     
-%     for x = 1:length(p.lons)
-%         
-%         for m= 1:p.maxMermodes+1
-%             
-%             if m==1
-%                 % Kelvin Wave
-%                 psi = hermiteeq(m-1, p.lats.*p.deg./lambda);
-%                 F(m,x,t) = psi0./sqrt(2) * trapz(p.lats.*p.deg, psi.*squeeze(taux(x,:,t))'./lambda); % Kelvin Wave, YM99 Eq. 6a
-%             else
-%                 % Rossby Wave
-%                 psin1 = hermiteeq(m-1, p.lats.*p.deg./lambda);
-%                 psip1 = hermiteeq(m+1, p.lats.*p.deg./lambda);
-%                 tint = (psip1./(sqrt(m+1)) - psin1./(sqrt(m))).*squeeze(taux(x,:,t))'./lambda;
-%                 F(m,x,t) = psi0.*trapz(p.lats.*p.deg, tint);
-%             end
-%         end
-%     end
-% end
 yn = p.lats.*p.deg./lambda; % Normalized Meridional Dimension
-dyn = yn(2) - yn(1);
+dyn = yn(2) - yn(1);        % Delta y
 
 tvec = double(reshape(permute(taux, [1 3 2]), nlons*ntimes, nlats));
-fvec = NaN * zeros([p.maxMermodes+1 nlons*ntimes]);
 
+%Preallocate
+fvec = NaN * zeros([p.maxMermodes+1 nlons*ntimes]);
 psivec = NaN * zeros([p.maxMermodes+1 length(yn)]);
+
+% Make Herm Funcs
 for m=0:p.maxMermodes+1
-    psivec(m+1,:) = hermFuncAve(m, yn);
+    psivec(m+1,:) = hermFuncAve(m, yn); %XXX possibly error in Mode 1...this follows Nagura
 end
 display('Hermite Polynomials Constructed');
 
+%Loop over each time and x step.
 for j=1:(nlons*ntimes)
     
+    % Output Display
     if (mod(j, p.wdisps) == 0)
         display(['Stress Step: ', num2str(j), '/', num2str(nlons*ntimes)]);
     end
     
     for m=0:p.maxMermodes
-       if m==0 %Kelvin wave
-%            psi = 1./sqrt(2).*hermiteeq(m, yn);
-%                        psi = 1./sqrt(2).*hermFuncAve(m, yn);
-                                   psi = 1./sqrt(2).*psivec(m+1,:)';
+       %Kelvin wave
+       if m==0 
 
-%            fvec(m+1,j) =  trapz(yn, psi.*squeeze(tvec(j,:))'); % Trapz is accurate but slow
-             fvec(m+1, j) = sum(psi.*squeeze(tvec(j,:))'.*dyn);
-       else    %Rossby Wave
-%            psin1 = hermiteeq(m-1, yn);
-%            psip1 = hermiteeq(m+1, yn);
+             psi = 1./sqrt(2).*psivec(m+1,:)';
+             
+            % Two options for type of numerical integration, see loadParams()
+             if (p.intmethod == 1)
+                fvec(m+1, j) = sum(psi.*squeeze(tvec(j,:))'.*dyn);
+             elseif (p.intmethod == 2)
+                fvec(m+1,j) =  trapz(yn, psi.*squeeze(tvec(j,:))');
+             end
+       %Rossby Wave     
+       else    
            psin1 = psivec(m,:)';
            psip1 = psivec(m+2,:)';
            tint = sqrt( (m*(m+1))/(2*(2*m+1))).*...
                (psip1./(sqrt(m+1)) - psin1./sqrt(m)).*squeeze(tvec(j,:))';
-%            fvec(m+1,j) = trapz(yn, tint);
-            fvec(m+1, j) = sum(tint.*dyn);
+           
+             if (p.intmethod == 1)
+                fvec(m+1, j) = sum(tint.*dyn);
+             elseif (p.intmethod == 2)
+                fvec(m+1,j) = trapz(yn, tint);
+             end
        end
     end
 end

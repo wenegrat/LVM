@@ -1,38 +1,33 @@
 %{
 ============== Linear Eq. Wave Model ====================
-Based on the LVM Model of Motoki Nagura
+Solves the continuously stratified, wind-forced linear long wave model
+on an Equatorial Beta Plane. (McCreary, 1981).
 
+All user vars are in loadParams.
+
+Output to outstruct.
+
+Author: Jacob Wenegrat
+wenegrat@uw.edu
+Based on code from Motoki Nagura (2010).
 %}
 clc
 close all
 clear q
 
-% Create Wind Stress Projection?
-wp = false;
-disp(['Generate forcing field, set to: ', num2str(wp)])
-
-if (~exist('ds', 'var'))
-        load('/Users/JacobWenegrat/Documents/IO/RawData/iodh.mat');
-end
-
 tic
 
-p = loadParams(motin);
+p = loadParams();
 
-% Calculate Vertical Modes
-
-% [wmd pmd c] = calcVertModes(ds, p);
-pmd = [4.93 4.926; 4.16 4.1592]'; % in this form to match output of calcVertModes
-c = [2.5335 1.6257];
-
-lambda = sqrt(c./(p.beta));
+lambda = sqrt(p.c./(p.beta));
 
 % Preallocate for speed
-if(wp)
+if(p.wp)
 F = NaN * zeros([p.maxVermodes p.maxMermodes+1 length(p.lons) length(p.time)]);
 end
 q = NaN * zeros([4 size(F)]);
 
+disp(['Generate forcing field, set to: ', num2str(p.wp)])
 disp('===========================================');
 disp(['Number of Vertical Modes = ', num2str(p.maxVermodes)]);
 disp(['Number of Meridional Modes = ', num2str(p.maxMermodes)]);
@@ -44,40 +39,48 @@ for n=1:p.maxVermodes
     disp('')
     
     disp('============= Calculate Wind Stress Projection =========');
-    if wp
+    if p.wp
     F(n,:,:,:) = windstressproject(p.ws, p, lambda(n));  % N x M x Lon x Time
     end
 
     disp('============= Integrate q function =====================');
-    q(:,n,:,:,:) = integrateLVM_LW(squeeze(F(n,:,:,:)), p, c(n), pmd(1,n)); % 4 x N x M x Lon x Time
-    % q(1... is all (forced and reflection)
-    % q(2... is forced only
-    % q(3... is single reflection
-    % q(4...  refl+refl
+    q(:,n,:,:,:) = integrateLVM_LW(squeeze(F(n,:,:,:)), p, p.c(n), p.pmd(1,n)); % 4 x N x M x Lon x Time
+    % q(1...) is all (forced + all reflection)
+    % q(2...) is forced only
+    % q(3...) is single reflection
+    % q(4...) refl+refl
 
     disp(['Time to calculate mode ', num2str(n),': ', num2str(toc./60), ' min']);
 end
-%%
+
 % Construct Dynamic Variables from q field.
-%                       1 - All
-%                       2 - Kelvin Forced 
-%                       3 - Kelvin Reflected 
-%                       4 - Kelvin Reflected x 2
-%                       5 - Rossby Forced
-%                       6 - Rossby Reflected
-%                       7 - Rossby Reflected x 2
-% ===================================================
-coption = 1;
 
 disp('============= Construct SSH Field  =====================');
-ssh = constructSSH(q, p, c, pmd, coption); 
-% sshs = resampleSSH(ssh,p, ds.aviso.time);
-sshs = resampleSSH(ssh, p, motmodel.day*24);
-    disp(['Time to construct SSH ', num2str(n),': ', num2str(toc./60), ' min']);
+ssh = constructSSH(q, p, p.c, p.pmd, p.coption);
+[sshs, ~] = resampleSSH(ssh, p.time, p.resampleTime);
+
+disp(['Time to construct SSH ', num2str(n),': ', num2str(toc./60), ' min']);
 
 disp('============= Construct U Field    =====================');
-u = constructU(q, p, c, pmd, coption);
-us = resampleU(u, motmodel.day*24);
+u = constructU(q, p, p.c, p.pmd, p.coption);
+[us resampleTime] = resampleU(u, p.time, p.resampleTime);
+
+
+% Create Output Struct
+% ==========================
+out.lats = p.lats;
+out.lons = p.lons;
+out.time = resampleTime;
+out.depths = p.vertdepths;
+out.Merid_modes = [-1 1:p.maxMermodes];
+out.Vert_modes = 1:p.maxVermodes;
+out.fproj = F;                      %Projection of forcing onto Merid. Modes
+out.q = q;                          %Integrated q function
+out.ssh = sshs;                     %ssh at original sampling frequency.
+out.u   = us;                       %u at original sampling frequency.
+out.params = p;
+out.params = rmfield(out.params, 'ws'); %Remove forcing to keep size down.
+
 
 disp(['Total Elapsed Time: ', num2str(toc./60), ' min']);
 

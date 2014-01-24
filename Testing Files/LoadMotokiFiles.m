@@ -1,11 +1,11 @@
-motmodel = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/SSH_R_f.nc');
+motmodel = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/SSH_out.nc');
 %%
-motq = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/O_n1_fr.nc');
+motq = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/O_n1_f.nc');
 %%
 motwp = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/I_n2.nc');
 motin = ncdfread('/Users/JacobWenegrat/Documents/LWM/Wforc/ECMWF_TAUX_IO.nc');
 %%
-motu = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/u15m_R_fr.nc');
+motu = ncdfread('/Users/JacobWenegrat/Documents/LWM/Integration/output/u15m_out.nc');
 %%
 
 for i=1:1682
@@ -40,8 +40,8 @@ onetoone
 title(num2str(regress(double(squeeze(motmodel.SSH(xloc,yloc,:))), squeeze(sshs(xloc, yloc,:)))))
 
 %%
-mode = 4;
-qk  = squeeze(q(3,1,:,:,:));
+mode = 7;
+qk  = squeeze(q(2,1,:,:,:));
 qk = permute(qk, [2 3 1]);
 
 subplot(1,3,1)

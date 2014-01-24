@@ -1,14 +1,18 @@
-function us  = resampleU(u, resampleTime)
+function [us resampletime] = resampleU(u, intime, resamplenum)
 
 [ndepths nlons nlats nts] = size(u);
 
 uvec = reshape(u, ndepths.*nlons.*nlats, nts);
 
-uveco = NaN * zeros([ndepths.*nlons*nlats length(resampleTime)]);
+ntsre = floor(nts./resamplenum);
+
+uveco = NaN * zeros([ndepths.*nlons*nlats ntsre]);
 for i=1:(ndepths.*nlons*nlats)
 
-      uveco(i,:) = BlockMean(uvec(i,:),1,7*2); % For Model Comp
+      uveco(i,:) = BlockMean(uvec(i,:),1,resamplenum); % For Model Comp
 
 end
-us = reshape(uveco, ndepths, nlons, nlats, length(resampleTime));
+us = reshape(uveco, ndepths, nlons, nlats, ntsre);
+
+resampletime = intime(1:resamplenum:ntsre);
 end

@@ -1,16 +1,17 @@
-function sshs  = resampleSSH(ssh, p, resampleTime)
+function [sshs resampletime] = resampleSSH(ssh, intime, resamplenum)
 
 [nlons nlats nts] = size(ssh);
 
 svec = reshape(ssh, nlons.*nlats, nts);
 
-sveco = NaN * zeros([nlons*nlats length(resampleTime)]);
-for i=1:(nlons*nlats)
-%     sveco(i,:) = interp1(p.time, svec(i,:), resampleTime);
-      sveco(i,:) = BlockMean(svec(i,:),1,7*2); % For Model Comp
-%       sveco(i,:) = BlockMean(svec(i,1:513*4),1,4);
+ntsre = floor(nts./resamplenum);
 
-%       sveco(i,:) = sveco(i,:) - nanmean(sveco(i,:));
+sveco = NaN * zeros([nlons*nlats ntsre]);
+for i=1:(nlons*nlats)
+      sveco(i,:) = BlockMean(svec(i,:),1,resamplenum); 
 end
-sshs = reshape(sveco, nlons, nlats, length(resampleTime));
+sshs = reshape(sveco, nlons, nlats, ntsre);
+
+resampletime = intime(1:resamplenum:ntsre);
+
 end

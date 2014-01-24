@@ -72,40 +72,42 @@ for tn = 1:length(p.time)                   % TIME LOOP
             uall(m+1,end) = eref(m+1).*uall(1,end); % East BC, assigned to Rossby Mode
 
         end
+       
+       % Choose type of timestepping routine.
+       if (p.method == 1)
+           % Lax Wendroff
+           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+           % ut = u - c*dt*Dx(u) + c^2*dt^2/2*Dxx(u) + dt/2*(F(t+1) + F) -
+           %                                                c^2*dt^2/2 * Dx(F)
+           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%        % Lax Wendroff
-%        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        % ut = u - c*dt*Dx(u) + c^2*dt^2/2*Dxx(u) + dt/2*(F(t+1) + F) -
-%        %                                                c^2*dt^2/2 * Dx(F)
-%        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        
-%        
-%        A = -cn(m+1).*Dxc+(cn(m+1).^2.*dt/2)*Dxx;  % A matrix
-%        D = dampn.*I;                         % Damping Matrix
-%        M = I+dt*(A - D);                          % Total Differential Equation
-%                                                   % Make forcing matrix
-%        if (tn~=length(p.time))
-%            Fm = 1/2*(squeeze(F(m+1,:,tn+1)) + squeeze(F(m+1,:,tn)))'...
-%                -cn(m+1).^2*dt/2*Dxx*(squeeze(F(m+1,:,tn))');
-%        else
-%            Fm = squeeze(F(m+1,:,tn))'...
-%                -cn(m+1).^2*dt/2*Dxx*(squeeze(F(m+1,:,tn))');
-%        end   
-       
-       % Upwind
-       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-       % XXX Testing for model comparison
-       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-       if m==0
-           R = diag(ones(1,n-1), -1);
-       else
-           R = diag(ones(1,n-1), 1);
+           A = -cn(m+1).*Dxc+(cn(m+1).^2.*dt/2)*Dxx;  % A matrix
+           D = dampn.*I;                         % Damping Matrix
+           M = I+dt*(A - D);                          % Total Differential Equation
+                                                      % Make forcing matrix
+           if (tn~=length(p.time))
+               Fm = 1/2*(squeeze(F(m+1,:,tn+1)) + squeeze(F(m+1,:,tn)))'...
+                   -cn(m+1).^2*dt/2*Dxx*(squeeze(F(m+1,:,tn))');
+           else
+               Fm = squeeze(F(m+1,:,tn))'...
+                   -cn(m+1).^2*dt/2*Dxx*(squeeze(F(m+1,:,tn))');
+           end   
+       elseif (p.method == 2)
+           % Upwind
+           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+           % Method Utilized By Motoki Nagura (2010)
+           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+           
+           if m==0
+               R = diag(ones(1,n-1), -1);
+           else
+               R = diag(ones(1,n-1), 1);
+           end
+           A = abs(cn(m+1)).*(R - I)./h; % A Matrix
+           D = dampn.*I;
+           M = I + dt*(A - D);
+           Fm = squeeze(F(m+1,:,tn))'; % Forcing
        end
-       A = abs(cn(m+1)).*(R - I)./h;
-       D = dampn.*I;
-       M = I + dt*(A - D);
-       Fm = squeeze(F(m+1,:,tn))';
-       
 
        
        Fn = Fm.*psi0./(p.rho.*p.H); % Forcing, dimensionalized
