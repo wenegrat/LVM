@@ -57,7 +57,7 @@ for n=1:p.maxVermodes
 
     disp(['Time to calculate mode ', num2str(n),': ', num2str(toc./60), ' min']);
 end
-
+%%
 % Construct Dynamic Variables from q field.
 %                       1 - All
 %                       2 - Kelvin Forced 

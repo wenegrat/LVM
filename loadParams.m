@@ -48,5 +48,5 @@ p.H = 4000;
 
 % Constants for code progress display
 p.tdisps = floor(length(p.time)/4);
-p.wdisps = floor(length(p.lons).*length(p.time)/10);
+p.wdisps = floor(length(p.lons).*length(p.time)/4);
 end
