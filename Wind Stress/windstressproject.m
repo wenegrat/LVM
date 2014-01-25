@@ -33,7 +33,7 @@ for j=1:(nlons*ntimes)
              
             % Two options for type of numerical integration, see loadParams()
              if (p.intmethod == 1)
-                fvec(m+1, j) = sum(psi.*squeeze(tvec(j,:))'.*dyn);
+                fvec(m+1, j) = sum(psi.*tvec(j,:)'.*dyn);
              elseif (p.intmethod == 2)
                 fvec(m+1,j) =  trapz(yn, psi.*squeeze(tvec(j,:))');
              end
@@ -42,7 +42,7 @@ for j=1:(nlons*ntimes)
            psin1 = psivec(m,:)';
            psip1 = psivec(m+2,:)';
            tint = sqrt( (m*(m+1))/(2*(2*m+1))).*...
-               (psip1./(sqrt(m+1)) - psin1./sqrt(m)).*squeeze(tvec(j,:))';
+               (psip1./(sqrt(m+1)) - psin1./sqrt(m)).*tvec(j,:)';
            
              if (p.intmethod == 1)
                 fvec(m+1, j) = sum(tint.*dyn);

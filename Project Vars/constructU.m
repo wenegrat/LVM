@@ -24,7 +24,7 @@ function u = constructU(q, p, c, pmodes, option )
 qvec = makeqvec(q, p, force, refl, rere);
 
 %Preallocate for speed
-uvec = zeros([ndepths length(p.lats) length(p.lons).*length(p.time)]);
+uvec = zeros([ndepths length(p.lons).*length(p.time) length(p.lats) ]);
 
 for n=1:p.maxVermodes
      lambda = sqrt(c(n)./(p.beta));
@@ -45,19 +45,19 @@ for n=1:p.maxVermodes
             if (m==0)
                 if (kelv)   %Check to see if the Kelvin wave should be added
                 utemp = phik(y)./sqrt(2).*qt; 
-                uvec(:,y,:) = squeeze(uvec(:,y,:)) + pmodes(:,n)*utemp;
+                uvec(:,:,y) = uvec(:,:,y) + pmodes(:,n)*utemp;
                 end
             elseif ross     %Check to see if the Rossby wave should be added
                 h = sqrt( m*(m+1)/(2*(2*m + 1))).*(phip1(y)./sqrt(m+1) - phin1(y)./sqrt(m));
                 utemp = qt.*h;
-                uvec(:,y,:) = squeeze(uvec(:,y,:)) + pmodes(:,n)*utemp;
+                uvec(:,:,y) = uvec(:,:,y)+ pmodes(:,n)*utemp;
             end
         end
      end
 end
  %Reshape and permute SSH vector back into dims of: Lat x Lon x Time 
- u = reshape(uvec, ndepths, length(p.lats), length(p.lons), length(p.time));
- u = permute(u, [1 3 2 4]);
+ u = reshape(uvec, ndepths,  length(p.lons), length(p.time), length(p.lats));
+ u = permute(u, [1 2 4 3]);
 end
 
 

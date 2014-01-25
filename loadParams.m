@@ -2,8 +2,8 @@ function p = loadParams()
 
 % Basic Run Parameters
 % ===============================
-p.maxVermodes = 1;          % How many vertical modes to use
-p.maxMermodes = 1;          % How many meridional modes to use
+p.maxVermodes = 2;          % How many vertical modes to use
+p.maxMermodes = 6;          % How many meridional modes to use
 
 % p.wp
 % Should be true unless the F field already exists for the data and 
